@@ -232,8 +232,8 @@ def parse_ad_page(page_soup, uid, url):
 def create_item_page(content, uid):
     """Creates an item advertisement page based on content json and uid. Also downloads and saves all ad images if not exist"""
     create_folder("pages/" + uid)
-    # if os.path.exists("pages/" + uid + "/index.html") or os.path.exists("pages/" + uid + "/content.json"):
-    #     return True
+    if os.path.exists("pages/" + uid + "/index.html") or os.path.exists("pages/" + uid + "/content.json"):
+        return True
     print("Creating page for ad %s" % uid)
     with open("pages/" + uid + "/content.json", "w") as file:
         file.write(json.dumps(content))
@@ -295,10 +295,10 @@ write_uids = uniqify(load_uids + uids)
 with open("ads.json", "w") as file:
     file.write(json.dumps(write_uids))
 
-#pool = ThreadPool(10)
-#uid_pool = pool.map(process_ad_page_full, write_uids)
-for uid in write_uids:
-    process_ad_page_full(uid)
+pool = ThreadPool(10)
+uid_pool = pool.map(process_ad_page_full, write_uids)
+# for uid in write_uids:
+#     process_ad_page_full(uid)
 
 split_uid_list = [uids[x:x+max_page_items] for x in range(1, len(uids),max_page_items)]
 for counter, uid_list in enumerate(split_uid_list):
