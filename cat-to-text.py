@@ -21,7 +21,7 @@ from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 
 # Max pages from marktplaats to parse
-max_pages = 100
+max_pages = 102
 # Max ads on new overview page
 max_page_items = 100
 
@@ -61,7 +61,11 @@ def page_to_soup(page, number=0):
     else:
         page_url = page
     req = urllib2.Request(page_url, headers={'User-Agent': 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/4.0; InfoPath.2; SV1; .NET CLR 2.0.50727; WOW64)'})
-    page = urllib2.urlopen(req).read()
+    try:
+        page = urllib2.urlopen(req).read()
+    except urllib2.HTTPError as e:
+        print("Could not retreive HTTP page %s" % page_url)
+        sys.exit(1) 
     page_soup = BeautifulSoup(page)
     return page_soup
 
@@ -264,10 +268,11 @@ def get_url_from_uid_json_file(uid):
 
 def process_ad_page_full(uid):
     """Does all the functions to get and parse an ad, used for the thread pool"""
-    url = get_url_from_uid_json_file(uid)
-    ad_page_soup = page_to_soup(url)
-    content = parse_ad_page(ad_page_soup, uid, url)
-    create_item_page(content, uid)
+    if not os.path.exists("pages/" + uid + "/index.html"):
+        url = get_url_from_uid_json_file(uid)
+        ad_page_soup = page_to_soup(url)
+        content = parse_ad_page(ad_page_soup, uid, url)
+        create_item_page(content, uid)
 
 
 ads_list = []
