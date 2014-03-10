@@ -40,7 +40,10 @@ filter = ["postzegels", "aandelen", "lima", "h0", 'modelbouw', "boek", "tijdschr
         "fietslabels", "grote alken", "encyclopedia", "postzegel", "jigsaw", "uitgever", "uitgave", "dienstregeling", "dienstregelingen",
         "aandeel", "videobanden", "schuifpuzzel", "trsfo", "trafo", "den oudsten", "this, that & the other", "Op de rails", "rail hobby",
         "trix", "bahnland ddr", "brief", "De blauwe bus", "The Stock Book of the Nene Valley Railway", "Bahnnews", "kleinbeelddia",
-        "gravure", "paul henken", "Bierpul", "Daar komt de trein", "time tables", "maandblad" ]
+        "gravure", "paul henken", "Bierpul", "Daar komt de trein", "time tables", "maandblad", "De spoorwegen van Afrika", "puntfriteszakjes",
+        "Van dishoeck", "Db blick-punkt", "dia's", "onderzetters", "lage bekers", "hoge bekers", "christkindelsmarkt", "videoband", 
+        "de haagse paardetrams", "reeskamp", "De amsterdamse tram in het verleden", "legpuzzel", "vhs banden", "Leideritz", "spoorweg journaal",
+        "Hema treinenset", "blikken rails"]
 num = 0
 
 def create_folder(directory):
