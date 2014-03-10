@@ -177,12 +177,13 @@ def create_overview_page(ads_list, page_number, max_pages, filename):
         file.write("</tr></thead><tbody>\n")
         for ad in ads_list:
            file.write("<tr>")
-           file.write("<td><img src='")
+           file.write("<td><a href='")
+           file.write("pages/" + str(ad["uid"]) + "/' border=;0'><img src='")
            img_loc = "images/" + str(ad["uid"]) + '.jpg'
            if not os.path.exists("images/" + str(ad["uid"]) + '.jpg'):
                save_image(ad["img_url"], img_loc)
            file.write(img_loc)
-           file.write("' style='width: 150px; height: auto;' alt='image' /></td>")
+           file.write("' style='width: 150px; height: auto;' alt='image' /></a></td>")
 
            file.write("<td><strong><a href='")
            file.write("pages/" + str(ad["uid"]) + "/index.html")
