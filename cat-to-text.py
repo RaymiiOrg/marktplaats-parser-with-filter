@@ -29,21 +29,11 @@ pool = ThreadPool()
 
 base_url = "http://www.marktplaats.nl/z/verzamelen/spoorwegen-en-tramwegen.html?categoryId=944&sortBy=SortIndex&sortOrder=decreasing&currentPage="
 
-filter = ["postzegels", "aandelen", "lima", "h0", 'modelbouw', "boek", "tijdschrift", "magazin", "magazine", "De trein hoort erbij",
-        "Sporen over zee", "gebonden", "folder", "ansichtkaarten", "ansichtkaart", "foto", "Brochure", "jaargang", "nachschlagewerk",
-        "treinkaartjes", "150 jaar spoorwegen", "Jubileumuitgave", "railrunner", "reisgidsen", "prent", "Matchbox", "hardcover",
-        "lepeltjes", "ansichten", "Elsevier", "Uitgegeven", "kaart", "enveloppe", "envelop", "Kaartspel", "kippenlijn", "waterlandse",
-        "bahnpost", "Spoorwegen in Nederland", "Wereld Spoorwegatlas", "dolby digital", "roco", "knipsel", "Gestempeld", 
-        "Spoorwegmaterieel in Nederland", "Dieseltreinen in Nederland", "fleischman", "fabdor", "Treinen van A tot Z", "marklin",
-        "kalender", "krant", "post it", "Overstappen aan de blaakschedijk", "model", "Blikken trein", "schuifspel", "Miniatuur", 
-        "redacteuren", "uitgeverij", "Theelepel", "opwindlocomotieven", "Kunststof treinstation", "miniatuur", "lepeltje", "kolen wagon",
-        "fietslabels", "grote alken", "encyclopedia", "postzegel", "jigsaw", "uitgever", "uitgave", "dienstregeling", "dienstregelingen",
-        "aandeel", "videobanden", "schuifpuzzel", "trsfo", "trafo", "den oudsten", "this, that & the other", "Op de rails", "rail hobby",
-        "trix", "bahnland ddr", "brief", "De blauwe bus", "The Stock Book of the Nene Valley Railway", "Bahnnews", "kleinbeelddia",
-        "gravure", "paul henken", "Bierpul", "Daar komt de trein", "time tables", "maandblad", "De spoorwegen van Afrika", "puntfriteszakjes",
-        "Van dishoeck", "Db blick-punkt", "dia's", "onderzetters", "lage bekers", "hoge bekers", "christkindelsmarkt", "videoband", 
-        "de haagse paardetrams", "reeskamp", "De amsterdamse tram in het verleden", "legpuzzel", "vhs banden", "Leideritz", "spoorweg journaal",
-        "Hema treinenset", "blikken rails"]
+filter = []
+
+with open("./filter.txt") as filterfile:
+    for line in filterfile:
+        filter.append(line.rstrip('\n'))
 num = 0
 
 def create_folder(directory):
