@@ -21,7 +21,7 @@ from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 
 # Max pages from marktplaats to parse
-max_pages = 102
+max_pages = 2
 # Max ads on new overview page
 max_page_items = 100
 
@@ -285,12 +285,16 @@ if os.path.exists("ads.json"):
     print("Reading ads.json")
     with open("ads.json", "r") as file:
         load_uids = json.load(file)
+        print("Loaded ads.json file")
 else:
     print("Creating ads.json")
     load_uids = []
 
 uids = uniqify(uids)
-write_uids = uniqify(load_uids + uids)
+for item in uniqify(load_uids):
+    uids.append(item)
+
+write_uids = uniqify(uids)
 with open("ads.json", "w") as file:
     file.write(json.dumps(write_uids))
 
