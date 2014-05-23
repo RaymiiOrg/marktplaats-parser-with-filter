@@ -268,49 +268,54 @@ def process_ad_page_full(uid):
         content = parse_ad_page(ad_page_soup, uid, url)
         create_item_page(content, uid)
 
+def main():
+    global max_pages
+    global pax_page_items
+    global pool
+    global num
 
-ads_list = []
-for number in range(1,max_pages):
-    overview_page_soup = page_to_soup(base_url, number)
-    ads_list.append(parse_overview_page(overview_page_soup))
-    print("Parsed overview page %i" % number)
-create_ad_overview_json_file(ads_list)
-
-uids = []
-for ads in ads_list:
-    for ad in ads:
-        uids.append(ad["uid"])
-
-if os.path.exists("ads.json"):
-    print("Reading ads.json")
-    with open("ads.json", "r") as file:
-        load_uids = json.load(file)
-        print("Loaded ads.json file")
-else:
-    print("Creating ads.json")
-    load_uids = []
-
-uids = uniqify(uids)
-for item in uniqify(load_uids):
-    uids.append(item)
-
-write_uids = uniqify(uids)
-with open("ads.json", "w") as file:
-    file.write(json.dumps(write_uids))
-
-pool = ThreadPool(10)
-uid_pool = pool.map(process_ad_page_full, write_uids)
-# for uid in write_uids:
-#     process_ad_page_full(uid)
-
-split_uid_list = [uids[x:x+max_page_items] for x in range(1, len(uids),max_page_items)]
-for counter, uid_list in enumerate(split_uid_list):
-    counter = counter + 1
     ads_list = []
-    for uid in uid_list:
-        with open("pages/" + uid + "/overview_page.json") as file:
-            ads_list.append(json.load(file))
-    max_pages = len(split_uid_list)
-    create_overview_page(ads_list, counter, max_pages, "test")
+    for number in range(1,max_pages):
+        overview_page_soup = page_to_soup(base_url, number)
+        ads_list.append(parse_overview_page(overview_page_soup))
+        print("Parsed overview page %i" % number)
+    create_ad_overview_json_file(ads_list)
+    
+    uids = []
+    for ads in ads_list:
+        for ad in ads:
+            uids.append(ad["uid"])
+    
+    if os.path.exists("ads.json"):
+        print("Reading ads.json")
+        with open("ads.json", "r") as file:
+            load_uids = json.load(file)
+    else:
+        print("Creating ads.json")
+        load_uids = []
+    
+    for item in load_uids:
+        uids.append(item)
+    
+    write_uids = uids
+    with open("ads.json", "w") as file:
+        file.write(json.dumps(write_uids))
+
+    pool = ThreadPool(10)
+    uid_pool = pool.map(process_ad_page_full, write_uids)
+    # for uid in write_uids:
+    #     process_ad_page_full(uid)
+    
+    split_uid_list = [uids[x:x+max_page_items] for x in range(0, len(uids),max_page_items)]
+    for counter, uid_list in enumerate(split_uid_list):
+        counter = counter + 1
+        ads_list = []
+        for uid in uid_list:
+            with open("pages/" + uid + "/overview_page.json") as file:
+                ads_list.append(json.load(file))
+        max_pages = len(split_uid_list)
+        create_overview_page(ads_list, counter, max_pages, "test")
 
 
+if __name__ == "__main__":
+    main()
