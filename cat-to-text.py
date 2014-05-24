@@ -77,7 +77,6 @@ def parse_overview_page(page_soup):
     for item in page_soup.find_all(attrs={'class': "defaultSnippet"}):
         stop_loop = False
         item_soup = BeautifulSoup(item.encode('utf-8'))
-    #    print item_soup.prettify(formatter="html")
         item_title = item_soup.find(attrs={'class':'mp-listing-title'}).get_text().encode('utf-8')
         item_descr = item_soup.find(attrs={'class':'mp-listing-description'})
         if item_descr:
@@ -156,7 +155,7 @@ def create_overview_page(ads_list, page_number, max_pages, filename):
         next_html = ("<span class='pull-right'><a href='%s' class='btn btn-success btn-large'><i class='icon-white icon-arrow-right'></i>Next Page</a></span>" % next_filename)
     filename = filename + "-" + str(page_number) + ".html"
     with open(filename, "w") as file:
-        file.write("<!DOCTYPE html><html lang='en'><head><title>Overview</title><link href='http://netdna.bootstrapcdn.com/bootswatch/3.1.1/cerulean/bootstrap.min.css' rel='stylesheet'></head><body>")
+        file.write("<!DOCTYPE html><html lang='en'><head><title>Overview</title><link href='http://netdna.bootstrapcdn.com/bootswatch/3.1.1/cerulean/bootstrap.min.css' rel='stylesheet'><meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /></head>")
         file.write('<body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-12">')
         file.write("<h1>Overview page #%s</h1>" % (str(page_number)))
         file.write(prev_html)
@@ -171,13 +170,12 @@ def create_overview_page(ads_list, page_number, max_pages, filename):
         for ad in ads_list:
            file.write("<tr>")
            file.write("<td><a href='")
-           file.write("pages/" + str(ad["uid"]) + "/' border=;0'><img src='")
+           file.write("pages/" + str(ad["uid"]) + "/'><img src='")
            img_loc = "images/" + str(ad["uid"]) + '.jpg'
            if not os.path.exists("images/" + str(ad["uid"]) + '.jpg'):
                save_image(ad["img_url"], img_loc)
            file.write(img_loc)
-           file.write("' style='width: 150px; height: auto;' alt='image' /></a></td>")
-
+           file.write("' style='width: 150px; height: auto; border:0;' alt='image' /></a></td>")
            file.write("<td><strong><a href='")
            file.write("pages/" + str(ad["uid"]) + "/index.html")
            file.write("'>")
@@ -202,7 +200,7 @@ def create_overview_page(ads_list, page_number, max_pages, filename):
         file.write(next_html)
         file.write("</div></div><hr /><div class='row'><div class='col-md-12'><div class='footer'>")
         file.write("<p>Marktplaats crawler by <a href='https://raymii.org'>Raymii.org</a>.")
-        file.write("</div></div></div></body></html>")
+        file.write("</div></div></div></div></body></html>")
         print("Written overview page to %s" % filename)
 
 def parse_ad_page(page_soup, uid, url):
@@ -214,6 +212,7 @@ def parse_ad_page(page_soup, uid, url):
         content["uid"] = uid
         content["url"] = url
         content["title"] = item_soup.find(attrs={'id':'title'}).get_text().encode('utf-8')
+        content["title"] = cgi.escape(content["title"])
         content["descr"] = item_soup.find(attrs={'id':'vip-ad-description'}).get_text().encode('utf-8')
         content["views"] = item_soup.find(attrs={'id':'vip-ad-count'}).get_text().encode('utf-8')
         content["price"] = item_soup.find(attrs={'id':'vip-ad-price-container'}).get_text().encode('utf-8')
@@ -289,7 +288,11 @@ def main():
     if os.path.exists("ads.json"):
         print("Reading ads.json")
         with open("ads.json", "r") as file:
-            load_uids = json.load(file)
+            try:
+                load_uids = json.load(file)
+            except ValueError as error:
+                print("ajs.json exists but error: %s" % error)
+                load_uids = []
     else:
         print("Creating ads.json")
         load_uids = []
@@ -297,12 +300,12 @@ def main():
     for item in load_uids:
         uids.append(item)
     
-    write_uids = uids
+    uids = uniqify(uids)
     with open("ads.json", "w") as file:
-        file.write(json.dumps(write_uids))
+        file.write(json.dumps(uids))
 
     pool = ThreadPool(10)
-    uid_pool = pool.map(process_ad_page_full, write_uids)
+    uid_pool = pool.map(process_ad_page_full, uids)
     # for uid in write_uids:
     #     process_ad_page_full(uid)
     
