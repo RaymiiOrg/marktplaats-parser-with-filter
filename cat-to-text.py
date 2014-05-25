@@ -28,6 +28,7 @@ max_page_items = 100
 pool = ThreadPool() 
 
 base_url = "http://www.marktplaats.nl/z/verzamelen/spoorwegen-en-tramwegen.html?categoryId=944&sortBy=SortIndex&sortOrder=decreasing&currentPage="
+title = "Spoorwegen"
 
 filter = []
 
@@ -141,25 +142,52 @@ def create_ad_overview_json_file(ads_list):
 
 def create_overview_page(ads_list, page_number, max_pages, filename):
     """Creates an overview page from a list with ad json data."""
+    prev_pagination = []
+    if page_number > 1:
+        for prev_page_num in range(1, page_number):
+            prev_pagination.append(("<li><a href='%s'>%s</a></li>" ) % (filename + "-" + str(prev_page_num) + ".html", str(prev_page_num)))
+    next_pagination = []
+    if page_number != max_pages:
+        for next_page_num in range(page_number + 1, max_pages + 1):
+            next_pagination.append(("<li><a href='%s'>%s</a></li>" ) % (filename + "-" + str(next_page_num) + ".html", str(next_page_num)))
+    current_pagination = []
+    current_pagination.append("<li class='active'><a href='#'>%s<span class='sr-only'>(current)</span></a></li>" % str(page_number))
+
     if page_number > 1:
         prev_filename = filename + "-" + str(page_number - 1) + ".html"
-        prev_html = ("<span class='pull-left'><a href='%s' class='btn btn-success btn-large'><i class='icon-white icon-arrow-left'></i>Previous Page</a></span>" % prev_filename)
+        prev_html = ("<a href='%s' class='btn btn-success btn-large'><i class='icon-white icon-arrow-left'></i>Previous Page</a>" % prev_filename)
     else:
         prev_filename = "#"
-        prev_html = ("")
+        prev_html = ("<button class='btn btn-sucess btn-large disabled'><i class='icon-white icon-arrow-left'></i>Previous Page</button>")
     if page_number == max_pages:
         next_filename = "#"
-        next_html = ("")
+        next_html = ("<button class='btn btn-sucess btn-large disabled'><i class='icon-white icon-arrow-left'></i>Next Page</button>")
     else: 
         next_filename = filename + "-" + str(page_number + 1) + ".html"
-        next_html = ("<span class='pull-right'><a href='%s' class='btn btn-success btn-large'><i class='icon-white icon-arrow-right'></i>Next Page</a></span>" % next_filename)
+        next_html = ("<a href='%s' class='btn btn-success btn-large'><i class='icon-white icon-arrow-right'></i>Next Page</a>" % next_filename)
     filename = filename + "-" + str(page_number) + ".html"
+
     with open(filename, "w") as file:
-        file.write("<!DOCTYPE html><html lang='en'><head><title>Overview</title><link href='http://netdna.bootstrapcdn.com/bootswatch/3.1.1/cerulean/bootstrap.min.css' rel='stylesheet'><meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /></head>")
-        file.write('<body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-12">')
-        file.write("<h1>Overview page #%s</h1>" % (str(page_number)))
+        file.write("<!DOCTYPE html><html lang='en'><head><title>Overview</title><link href='http://netdna.bootstrapcdn.com/bootswatch/3.1.1/cosmo/bootstrap.min.css' rel='stylesheet'><meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /></head>")
+        file.write('<body><a id="top-of-page"></a>')
+        file.write('<div class="container-fluid ">')
+        file.write('<div class="row"><div class="col-md-12">')
+        file.write(("<h1>%s</h1>") % ( title ))
+        file.write('<h6>Overview page #%s</h6>' % str(page_number))
+        file.write("</div></div>")
+        file.write("<div class='row'><div class='col-md-1'>")
         file.write(prev_html)
+        file.write("</div><div class='col-md-10'><ul class='pagination' style='float: none;margin: 0 auto;'>")
+        for line in prev_pagination:
+            file.write(line)
+        for line in current_pagination:
+            file.write(line)
+        for line in next_pagination:
+            file.write(line)
+        file.write("</ul></div><div class='col-md-1'>")
         file.write(next_html)
+        file.write("</div></div>")
+        file.write("<div class='row'><div class='col-md-12'>")
         file.write("<table class='table table-striped'>")
         file.write("<thead><tr>")
         file.write("<td>Foto</td>")
@@ -196,10 +224,21 @@ def create_overview_page(ads_list, page_number, max_pages, filename):
            file.write("</strong></td>")
            file.write("</tr>\n")
         file.write("</tbody></table>")
+        file.write("</div></div>")
+        file.write("<div class='row'><div class='col-md-1'>")
         file.write(prev_html)
+        file.write("</div><div class='col-md-10'><ul class='pagination' style='float: none;margin: 0 auto;'>")
+        for line in prev_pagination:
+            file.write(line)
+        for line in current_pagination:
+            file.write(line)
+        for line in next_pagination:
+            file.write(line)
+        file.write("</ul></div><div class='col-md-1'>")
         file.write(next_html)
-        file.write("</div></div><hr /><div class='row'><div class='col-md-12'><div class='footer'>")
-        file.write("<p>Marktplaats crawler by <a href='https://raymii.org'>Raymii.org</a>.")
+        file.write("</div></div>")
+        file.write("<hr /><div class='row'><div class='col-md-12'><div class='footer'>")
+        file.write(("<p>Marktplaats crawler by <a href='https://raymii.org'>Raymii.org</a>. Parsed marktplaats category <a href='%s'>%s</a>") % (base_url, title))
         file.write("</div></div></div></div></body></html>")
         print("Written overview page to %s" % filename)
 
@@ -291,7 +330,7 @@ def main():
             try:
                 load_uids = json.load(file)
             except ValueError as error:
-                print("ajs.json exists but error: %s" % error)
+                print("ads.json exists but error: %s" % error)
                 load_uids = []
     else:
         print("Creating ads.json")
