@@ -275,7 +275,7 @@ def create_item_page(content, uid):
         file.write(json.dumps(content))
         file.close()
     with open("pages/" + uid + "/index.html", "wb") as file:
-        file.write("<!DOCTYPE html><html lang='en'><head><title>%s</title><link href='http://netdna.bootstrapcdn.com/bootswatch/3.1.1/cerulean/bootstrap.min.css' rel='stylesheet'></head><body>" %(content["descr"].decode('utf-8').encode('ascii', 'xmlcharrefreplace')))
+        file.write("<!DOCTYPE html><html lang='en'><head><title>%s</title><link href='http://netdna.bootstrapcdn.com/bootswatch/3.1.1/cosmo/bootstrap.min.css' rel='stylesheet'><meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /></head>" % content["descr"].decode('utf-8').encode('ascii', 'xmlcharrefreplace'))
         file.write('<body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-12">')
         file.write("<h1><a href='%s'>%s</a></h1>" % (content["url"], content["title"].decode('utf-8').encode('ascii', 'xmlcharrefreplace')))
         file.write("<table class='table table-striped'>")
@@ -283,7 +283,7 @@ def create_item_page(content, uid):
         file.write("<tr><td>Prijs</td><td>%s</td></tr>" % (content["price"].decode('utf-8').encode('ascii', 'xmlcharrefreplace')))
         file.write("<tr><td>Views</td><td>%s</td></tr>" % (content["views"].decode('utf-8').encode('ascii', 'xmlcharrefreplace')))
         file.write("<tr><td>Verzendmethode</td><td>%s</td></tr>" % (content["shipping"].decode('utf-8').encode('ascii', 'xmlcharrefreplace')))
-        file.write("<tr><td colspan='2'><a href='%s'>%s</a></td></tr>" % (content["url"], content["url"]))
+        file.write("<tr><td colspan='2'><a href='%s'>View on Marktplaats</a></td></tr>" % content["url"])
         for counter, img_url in enumerate(content["images"]):
             if not os.path.exists("pages/" + uid + "/" + str(counter) + ".jpg"):
                 save_image(img_url, "pages/" + uid + "/" + str(counter) + ".jpg") 
@@ -291,7 +291,7 @@ def create_item_page(content, uid):
         file.write("</table>")
         file.write("</div></div><hr /><div class='row'><div class='col-md-12'><div class='footer'>")
         file.write("<p>Marktplaats crawler by <a href='https://raymii.org'>Raymii.org</a>.")
-        file.write("</div></div></div></body></html>")
+        file.write("</div></div></div></div></body></html>")
 
 def get_url_from_uid_json_file(uid):
     """Parse the overview json file and get the item URL from it"""
