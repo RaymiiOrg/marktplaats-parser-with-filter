@@ -244,3 +244,6 @@ buttons
 frans 2de hands
 Kristallen
 Kristal
+timetable
+opname
+winterscheopname
