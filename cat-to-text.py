@@ -201,7 +201,10 @@ def create_overview_page(ads_list, page_number, max_pages, filename):
            file.write("pages/" + str(ad["uid"]) + "/'><img src='")
            img_loc = "images/" + str(ad["uid"]) + '.jpg'
            if not os.path.exists("images/" + str(ad["uid"]) + '.jpg'):
-               save_image(ad["img_url"], img_loc)
+               try:
+                   save_image(ad["img_url"], img_loc)
+               except IOError as error:
+                   print("Could not retreive image for ad %s" % ad["uid"])
            file.write(img_loc)
            file.write("' style='width: 150px; height: auto; border:0;' alt='image' /></a></td>")
            file.write("<td><strong><a href='")
