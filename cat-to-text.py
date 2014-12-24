@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-# Copyright (C) 2013 - Remy van Elst
+# Copyright (C) 2014 - Remy van Elst
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -207,8 +207,8 @@ def create_overview_page(ads_list, page_number, max_pages, filename):
                try:
                    save_image(ad["img_url"], img_loc)
                except IOError as error:
-               print("Could not retreive image for ad %s" % ad["uid"])     
-        
+                   print("Could not retreive image for ad %s" % ad["uid"])         
+
            file.write(img_loc)
            file.write("' style='width: 150px; height: auto; border:0;' alt='image' /></a></td>")
            file.write("<td><strong><a href='")
@@ -253,14 +253,18 @@ def parse_ad_page(page_soup, uid, url):
     """Parses a Marktplaats.nl advertisement page and returns a dict with ad data"""
     content = {}
     content["images"] = []
-    for item in page_soup.find_all(attrs={'id': "vip-left-listing"}):
+    for item in page_soup.find_all(attrs={'class': "listing"}):
         item_soup = BeautifulSoup(item.encode('utf-8'))
         content["uid"] = uid
         content["url"] = url
-        content["title"] = item_soup.find(attrs={'id':'title'}).get_text().encode('utf-8')
+        try:
+            content["title"] = item_soup.find(attrs={'id':'title'}).get_text().encode('utf-8')
+        except AttributeError as e:
+            print(('\033[91mError processing UID %s: %s\033[0m') % (str(uid), str(e)))
+            return content
         content["title"] = cgi.escape(content["title"])
         content["descr"] = item_soup.find(attrs={'id':'vip-ad-description'}).get_text().encode('utf-8')
-        content["views"] = item_soup.find(attrs={'id':'vip-ad-count'}).get_text().encode('utf-8')
+        content["views"] = item_soup.find(attrs={'id':'view-count'}).get_text().encode('utf-8')
         content["price"] = item_soup.find(attrs={'id':'vip-ad-price-container'}).get_text().encode('utf-8')
         content["shipping"] = item_soup.find(attrs={'id':'vip-ad-shipping-cost'}).get_text().encode('utf-8')
         item_photo_carousel = item_soup.find(attrs={'id':'vip-carousel'})
@@ -282,40 +286,30 @@ def create_item_page(content, uid):
         file.write(json.dumps(content))
         file.close()
     with open("pages/" + uid + "/index.html", "wb") as file:
-        try:
+        if 'descr' in content:
             file.write("<!DOCTYPE html><html lang='en'><head><title>%s</title><link href='http://netdna.bootstrapcdn.com/bootswatch/3.1.1/cosmo/bootstrap.min.css' rel='stylesheet'><meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /></head>" % content["descr"].decode('utf-8').encode('ascii', 'xmlcharrefreplace'))
-        except Exception as e:
-            file.write("<!DOCTYPE html><html lang='en'><head><title></title><link href='http://netdna.bootstrapcdn.com/bootswatch/3.1.1/cosmo/bootstrap.min.css' rel='stylesheet'><meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /></head>")
-        file.write('<body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-12">')
-        try:
+            file.write('<body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-12">')
             file.write("<h1><a href='%s'>%s</a></h1>" % (content["url"], content["title"].decode('utf-8').encode('ascii', 'xmlcharrefreplace')))
-        except Exception as e:
-            file.write("<h1><a href='#'></a></h1>")
-
-        file.write("<table class='table table-striped'>")
-        try:
+            file.write("<table class='table table-striped'>")
             file.write("<tr><td>Beschrijving</td><td>%s</td></tr>" % (content["descr"].decode('utf-8').encode('ascii', 'xmlcharrefreplace')))
             file.write("<tr><td>Prijs</td><td>%s</td></tr>" % (content["price"].decode('utf-8').encode('ascii', 'xmlcharrefreplace')))
             file.write("<tr><td>Views</td><td>%s</td></tr>" % (content["views"].decode('utf-8').encode('ascii', 'xmlcharrefreplace')))
             file.write("<tr><td>Verzendmethode</td><td>%s</td></tr>" % (content["shipping"].decode('utf-8').encode('ascii', 'xmlcharrefreplace')))
             file.write("<tr><td colspan='2'><a href='%s'>View on Marktplaats</a></td></tr>" % content["url"])
-        except Exception as e:
-            file.write("<tr><td>Beschrijving</td><td></td></tr>")
-            file.write("<tr><td>Prijs</td><td></td></tr>")
-            file.write("<tr><td>Views</td><td></td></tr>")
-            file.write("<tr><td>Verzendmethode</td><td></td></tr>")
-            file.write("<tr><td colspan='2'><a href='#'>View on Marktplaats</a></td></tr>")
-        try:
-            for counter, img_url in enumerate(content["images"]):
-                if not os.path.exists("pages/" + uid + "/" + str(counter) + ".jpg"):
-                    save_image(img_url, "pages/" + uid + "/" + str(counter) + ".jpg") 
-                file.write("<tr><td colspan='2'><img src='%s' alt='image' /></td></tr>" % (str(counter) + ".jpg"))
-        except Exception as e:
-            file.write("<tr><td colspan='2'><img src='' alt='image' /></td></tr>")
-        file.write("</table>")
-        file.write("</div></div><hr /><div class='row'><div class='col-md-12'><div class='footer'>")
-        file.write("<p>Marktplaats crawler by <a href='https://raymii.org'>Raymii.org</a>.")
-        file.write("</div></div></div></div></body></html>")
+            try:
+                for counter, img_url in enumerate(content["images"]):
+                    if not os.path.exists("pages/" + uid + "/" + str(counter) + ".jpg"):
+                        save_image(img_url, "pages/" + uid + "/" + str(counter) + ".jpg") 
+                    file.write("<tr><td colspan='2'><img src='%s' alt='image' /></td></tr>" % (str(counter) + ".jpg"))
+            except Exception as e:
+                file.write("<tr><td colspan='2'><img src='' alt='image' /></td></tr>")
+            file.write("</table>")
+            file.write("</div></div><hr /><div class='row'><div class='col-md-12'><div class='footer'>")
+            file.write("<p>Marktplaats crawler by <a href='https://raymii.org'>Raymii.org</a>.")
+            file.write("</div></div></div></div></body></html>")
+        else:
+            file.write("<!DOCTYPE html><html lang='en'><head><title>%s</title><link href='http://netdna.bootstrapcdn.com/bootswatch/3.1.1/cosmo/bootstrap.min.css' rel='stylesheet'><meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /></head><body><div class='alert alert-danger' role='alert'><span class='glyphicon glyphicon-exclamation-sign' aria-hidden='true'></span><span class='sr-only'>Error:</span>processing this ad failed. It probably does not exist on Marktplaats anymore.</div></body></html>")
+            return
 
 def get_url_from_uid_json_file(uid):
     """Parse the overview json file and get the item URL from it"""
@@ -325,9 +319,10 @@ def get_url_from_uid_json_file(uid):
 def process_ad_page_full(uid):
     """Does all the functions to get and parse an ad, used for the thread pool"""
     # uncomment below to find out failint uid
-    #print(uid)
+    print("Parsing ad page for UID: %s" % str(uid))
     if not os.path.exists("pages/" + uid + "/index.html"):
         url = get_url_from_uid_json_file(uid)
+        print("Original URL: %s " % str(url))
         ad_page_soup = page_to_soup(url)
         content = parse_ad_page(ad_page_soup, uid, url)
         create_item_page(content, uid)
@@ -340,11 +335,11 @@ def main():
 
     ads_list = []
     # comment out below if only want to test parsing and rendering.
-    for number in range(1,max_pages):
-        overview_page_soup = page_to_soup(base_url, number)
-        ads_list.append(parse_overview_page(overview_page_soup))
-        print("Parsed overview page %i" % number)
-    create_ad_overview_json_file(ads_list)
+    #for number in range(1,max_pages):
+    #    overview_page_soup = page_to_soup(base_url, number)
+    #    ads_list.append(parse_overview_page(overview_page_soup))
+    #    print("Parsed overview page %i" % number)
+    #create_ad_overview_json_file(ads_list)
      
     uids = []
     for ads in ads_list:
@@ -371,12 +366,12 @@ def main():
         file.write(json.dumps(uids))
 
     # either this one, with threads
-    pool = ThreadPool(10)
-    uid_pool = pool.map(process_ad_page_full, uids)
+    #pool = ThreadPool(10)
+    #uid_pool = pool.map(process_ad_page_full, uids)
     # or this one, without threads
-    # for uid in uids:
-    #     process_ad_page_full(uid)
-    
+    for uid in uids:
+        process_ad_page_full(uid)
+
     split_uid_list = [uids[x:x+max_page_items] for x in range(0, len(uids),max_page_items)]
     for counter, uid_list in enumerate(split_uid_list):
         counter = counter + 1
