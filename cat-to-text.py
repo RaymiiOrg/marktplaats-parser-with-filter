@@ -334,7 +334,7 @@ def main():
     global num
 
     ads_list = []
-    comment out below if only want to test parsing and rendering.
+    #comment out below if only want to test parsing and rendering.
     for number in range(1,max_pages):
        overview_page_soup = page_to_soup(base_url, number)
        ads_list.append(parse_overview_page(overview_page_soup))
