@@ -334,12 +334,12 @@ def main():
     global num
 
     ads_list = []
-    # comment out below if only want to test parsing and rendering.
-    #for number in range(1,max_pages):
-    #    overview_page_soup = page_to_soup(base_url, number)
-    #    ads_list.append(parse_overview_page(overview_page_soup))
-    #    print("Parsed overview page %i" % number)
-    #create_ad_overview_json_file(ads_list)
+    comment out below if only want to test parsing and rendering.
+    for number in range(1,max_pages):
+       overview_page_soup = page_to_soup(base_url, number)
+       ads_list.append(parse_overview_page(overview_page_soup))
+       print("Parsed overview page %i" % number)
+    create_ad_overview_json_file(ads_list)
      
     uids = []
     for ads in ads_list:
@@ -366,11 +366,11 @@ def main():
         file.write(json.dumps(uids))
 
     # either this one, with threads
-    #pool = ThreadPool(10)
-    #uid_pool = pool.map(process_ad_page_full, uids)
+    pool = ThreadPool(10)
+    uid_pool = pool.map(process_ad_page_full, uids)
     # or this one, without threads
-    for uid in uids:
-        process_ad_page_full(uid)
+    #for uid in uids:
+    #    process_ad_page_full(uid)
 
     split_uid_list = [uids[x:x+max_page_items] for x in range(0, len(uids),max_page_items)]
     for counter, uid_list in enumerate(split_uid_list):
