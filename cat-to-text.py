@@ -177,6 +177,7 @@ def create_overview_page(ads_list, page_number, max_pages, filename):
         file.write('<div class="row"><div class="col-md-12">')
         file.write(("<h1>%s</h1>") % ( title ))
         file.write('<h6>Overview page #%s</h6>' % str(page_number))
+        file.write('<p>Last updated: %s.</p>' % str(datetime.datetime.now()))
         file.write("</div></div>")
         file.write("<div class='row'><div class='col-md-1'>")
         file.write(prev_html)
