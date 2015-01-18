@@ -107,11 +107,11 @@ def parse_overview_page(page_soup):
         item_img_src = item_soup.img['src']
         if remove_double_whitespace(item_prio) == "Topadvertentie":
             stop_loop = True
-            print("Filtering out sponsored ad.")
+            print("Filtering out sponsored ad %s" % item_url)
         for filteritem in filter:
             if filteritem.lower() in str(remove_double_whitespace(item_title)).lower() or filteritem in str(remove_double_whitespace(item_descr_ext)).lower() or filteritem in str(remove_double_whitespace(item_descr)).lower():
                 stop_loop = True
-                print("Filtering out ad with word trigger %s." % filteritem.lower())
+                print(("Filtering out ad %s with word trigger %s.") % ( item_url, filteritem.lower()) )
         if not stop_loop:
             ad_data = {}
             ad_data["title"] = remove_double_whitespace(item_title)
